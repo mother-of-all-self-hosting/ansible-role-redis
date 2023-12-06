@@ -28,6 +28,11 @@ redis_container_network: "{{ redis_identifier }}"
 # The role does not create these networks, so make sure they already exist.
 redis_container_additional_networks: []
 
+# Controls how long to wait for the container to stop gracefully before killing it.
+# Because `devture_systemd_docker_base_container_stop_grace_time_seconds` may be quite short and databases are more important to stop gracefully,
+# we default to at least 30 seconds.
+redis_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_container_stop_grace_time_seconds, 30] | max }}"
+
 # A list of extra arguments to pass to the container
 redis_container_extra_arguments: []
 
