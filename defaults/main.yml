@@ -14,7 +14,7 @@ redis_connection_password: ""
 redis_base_path: "{{ redis_identifier }}"
 redis_data_path: "{{ redis_base_path }}/data"
 
-redis_version: 7.2.3
+redis_version: 7.2.4
 
 redis_container_image: "{{ redis_container_image_registry_prefix }}redis:{{ redis_container_image_tag }}"
 redis_container_image_tag: "{{ redis_version }}-alpine"
