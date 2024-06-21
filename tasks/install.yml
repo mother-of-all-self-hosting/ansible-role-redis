@@ -10,6 +10,7 @@
   register: grub_cmdline_check
   changed_when: false
   become: true
+  when: redis_transparent_hugepage_disable
 
 - name: Ensure transparent_hugepage is set to never if missing
   lineinfile:
@@ -17,12 +18,12 @@
     path: /etc/default/grub
     regexp: "^(GRUB_CMDLINE_LINUX=\".*)\"$"
     line: '\1 transparent_hugepage=never"'
-  when: grub_cmdline_check.found == 0
+  become: true
   notify:
     - Update Grub
-  become: true
+  when: redis_transparent_hugepage_disable and grub_cmdline_check.found == 0
 
-- name: Ensure VM Overcommit is set to 1
+- name: Ensure VM Overcommit Memory is set to 1
   ansible.posix.sysctl:
     name: vm.overcommit_memory
     value: '1'
