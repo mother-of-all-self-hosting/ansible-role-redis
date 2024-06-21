@@ -1,5 +1,35 @@
 ---
 
+- name: Check if transparent_hugepage is disabled in the boot command
+  lineinfile:
+    backup: true
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX=".*transparent_hugepage=never'
+    state: absent
+  check_mode: true
+  register: grub_cmdline_check
+  changed_when: false
+  become: true
+
+- name: Ensure transparent_hugepage is set to never if missing
+  lineinfile:
+    backrefs: true
+    path: /etc/default/grub
+    regexp: "^(GRUB_CMDLINE_LINUX=\".*)\"$"
+    line: '\1 transparent_hugepage=never"'
+  when: grub_cmdline_check.found == 0
+  notify:
+    - Update Grub
+  become: true
+
+- name: Ensure VM Overcommit is set to 1
+  ansible.posix.sysctl:
+    name: vm.overcommit_memory
+    value: '1'
+    state: present
+    reload: true
+  become: true
+
 - name: Ensure Redis paths exist
   ansible.builtin.file:
     path: "{{ item }}"
