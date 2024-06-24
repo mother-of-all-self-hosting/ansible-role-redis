@@ -52,4 +52,4 @@ redis_transparent_hugepage_disabled: false
 
 redis_vm_overcommit_memory_enabled: false
 
-redis_reboot: false
+redis_reboot_enabled: false
