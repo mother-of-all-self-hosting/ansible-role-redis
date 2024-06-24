@@ -21,7 +21,7 @@
   become: true
   notify:
     - Update Grub
-  when: redis_transparent_hugepage_disable and grub_cmdline_check.found == 0
+  when: redis_transparent_hugepage_disabled and grub_cmdline_check.found == 0
 
 - name: Ensure VM Overcommit Memory is set to 1
   ansible.posix.sysctl:
