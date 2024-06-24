@@ -30,6 +30,7 @@
     state: present
     reload: true
   become: true
+  when: redis_vm_overcommit_memory_enabled
 
 - name: Ensure Redis paths exist
   ansible.builtin.file:
