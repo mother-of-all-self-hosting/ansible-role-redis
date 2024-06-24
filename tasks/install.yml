@@ -1,7 +1,7 @@
 ---
 
 - name: Check if transparent_hugepage is disabled in the boot command
-  lineinfile:
+  ansible.builtin.lineinfile:
     backup: true
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=".*transparent_hugepage=never'
