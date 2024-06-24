@@ -47,3 +47,14 @@ redis_systemd_wanted_services_list: []
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:6379"), or empty string to not expose.
 redis_container_redis_bind_port: ""
+
+# Transparent Huge Pages being enabled causes Redis incurs to a big latency penalty after the fork call is used in order to persist on disk
+# https://redis.io/docs/latest/operate/oss_and_stack/management/optimization/latency/#latency-induced-by-transparent-huge-pages
+redis_transparent_hugepage_disabled: false
+
+# The strict memory allocation can cause Redis's background saving to fail with a fork() error
+# https://redis.io/docs/latest/develop/get-started/faq/#background-saving-fails-with-a-fork-error-on-linux
+redis_vm_overcommit_memory_enabled: false
+
+# redis_transparent_hugepage_disabled requires a reboot for changes to take affect as it is making changes to the kernel
+redis_reboot_enabled: false
