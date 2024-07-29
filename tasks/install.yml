@@ -1,4 +1,14 @@
 ---
+- name: Inject warning about Redis dual-licensing starting from v7.4.0
+  ansible.builtin.set_fact:
+    devture_playbook_runtime_messages_list: |
+      {{
+        devture_playbook_runtime_messages_list | default([])
+        +
+        [
+          "WARNING: Starting from Redis v7.4.0, Redis is dual-licensed under the Redis Source Available License v2 and the Server Side Public License v1, details: https://redis.com/blog/redis-adopts-dual-source-available-licensing/ This means Redis is no longer Open Source. If you care about that, you may stick to the last known Open Source version, which is v7.2.5 OR (even better) consider switching to a fully Open Source alternative KeyDB. We've already prepared a KeyDB role that works as drop-in replacement for Redis, check it out: https://github.com/mother-of-all-self-hosting/ansible-role-keydb"
+        ]
+      }}
 
 - name: Check if transparent_hugepage is disabled in the boot command
   ansible.builtin.lineinfile:
