@@ -1,6 +1,7 @@
 # Redis Ansible role
 
-> **WARNING**: Starting from v7.4.x, Redis is no longer Open Source.
+> [!WARNING]
+> Starting from v7.4.x, Redis is no longer Open Source.
 > The Redis Labs company [announced their switch to source-available model](https://redis.com/blog/redis-adopts-dual-source-available-licensing/).
 > However, we at [etke.cc](https://etke.cc) are interested in supporting the Open Source community, so we will continue to maintain this role for a while, and we already offering (and migrating to) [KeyDB - an open-source fork of Redis](https://keydb.dev/) as an alternative.
 > The drop-in replacement for the Redis role is available in a form of the [KeyDB role](https://github.com/mother-of-all-self-hosting/ansible-role-keydb).
