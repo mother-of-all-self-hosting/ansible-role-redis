@@ -45,7 +45,10 @@ redis_systemd_required_services_list_auto: []
 redis_systemd_required_services_list_custom: []
 
 # List of systemd services that the redis systemd service wants
-redis_systemd_wanted_services_list: []
+redis_systemd_wanted_services_list: "{{ redis_systemd_wanted_services_list_default + redis_systemd_wanted_services_list_auto + redis_systemd_wanted_services_list_custom }}"
+redis_systemd_wanted_services_list_default: []
+redis_systemd_wanted_services_list_auto: []
+redis_systemd_wanted_services_list_custom: []
 
 # Controls whether the container exposes a port (tcp/6379 in the container)
 # that can be used to access redis from outside the container
