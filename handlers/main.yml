@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-# handlers file for redis
+# handlers file for Redis
 
 - name: Update Grub
   ansible.builtin.command: update-grub

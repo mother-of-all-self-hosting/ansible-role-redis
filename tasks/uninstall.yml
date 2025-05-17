@@ -37,7 +37,7 @@
         devture_playbook_runtime_messages_list | default([])
         +
         [
-          "Note: You are not using a local redis instance, but some old data remains from before in `{{ redis_data_path }}`. Feel free to delete it."
+          "Note: You are not using a local Redis instance, but some old data remains from before in `{{ redis_data_path }}`. Feel free to delete it."
         ]
       }}
 
