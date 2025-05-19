@@ -4,11 +4,14 @@
 
 ---
 
-- block:
-    - when: redis_enabled | bool
+- name: Perform Redis installation tasks
+  block:
+    - name: Validate Redis configuration
+      when: redis_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
 
-    - when: redis_enabled | bool
+    - name: Install Redis
+      when: redis_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
   tags:
     - setup-all
@@ -16,8 +19,10 @@
     - install-all
     - install-redis
 
-- block:
-    - when: not redis_enabled | bool
+- name: Perform Redis uninstallation tasks
+  block:
+    - name: Uninstall Redis
+      when: not redis_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
   tags:
     - setup-all
