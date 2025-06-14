@@ -21,24 +21,24 @@ ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_s
 ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ redis_identifier }} 2>/dev/null || true'
 
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
-			--rm \
-			--name={{ redis_identifier }} \
-			--log-driver=none \
-			--user={{ redis_uid }}:{{ redis_gid }} \
-			--cap-drop=ALL \
-			--read-only \
-			--tmpfs=/tmp:rw,noexec,nosuid,size=100m \
-			--network={{ redis_container_network }} \
-			{% if redis_container_redis_bind_port %}
-			-p {{ redis_container_redis_bind_port }}:6379 \
-			{% endif %}
-			--mount type=bind,src={{ redis_base_path }}/redis.conf,dst=/usr/local/etc/redis/redis.conf,ro \
-			--mount type=bind,src={{ redis_data_path }},dst=/data \
-			{% for arg in redis_container_extra_arguments %}
-			{{ arg }} \
-			{% endfor %}
-			{{ redis_container_image }} \
-			redis-server /usr/local/etc/redis/redis.conf
+      --rm \
+      --name={{ redis_identifier }} \
+      --log-driver=none \
+      --user={{ redis_uid }}:{{ redis_gid }} \
+      --cap-drop=ALL \
+      --read-only \
+      --tmpfs=/tmp:rw,noexec,nosuid,size=100m \
+      --network={{ redis_container_network }} \
+      {% if redis_container_redis_bind_port %}
+      -p {{ redis_container_redis_bind_port }}:6379 \
+      {% endif %}
+      --mount type=bind,src={{ redis_base_path }}/redis.conf,dst=/usr/local/etc/redis/redis.conf,ro \
+      --mount type=bind,src={{ redis_data_path }},dst=/data \
+      {% for arg in redis_container_extra_arguments %}
+      {{ arg }} \
+      {% endfor %}
+      {{ redis_container_image }} \
+      redis-server /usr/local/etc/redis/redis.conf
 
 {% for network in redis_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ redis_identifier }}
