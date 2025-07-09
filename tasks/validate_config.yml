@@ -3,10 +3,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: Fail if required Redis settings not defined
   ansible.builtin.fail:
-    msg: >
+    msg: >-
       You need to define a required configuration setting (`{{ item }}`).
   when: "vars[item] == ''"
   with_items:
