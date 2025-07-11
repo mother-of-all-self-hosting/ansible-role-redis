@@ -12,7 +12,7 @@
 - name: Uninstall Redis systemd services and files
   when: redis_service_stat.stat.exists | bool
   block:
-    - name: Ensure Redis is stopped
+    - name: Ensure Redis systemd service is stopped
       ansible.builtin.systemd:
         name: "{{ redis_identifier }}"
         state: stopped
