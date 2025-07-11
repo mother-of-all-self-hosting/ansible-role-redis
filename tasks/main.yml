@@ -3,27 +3,24 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: Perform Redis installation tasks
-  block:
-    - name: Validate Redis configuration
-      when: redis_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
-
-    - name: Install Redis
-      when: redis_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
+  when: redis_enabled | bool
   tags:
     - setup-all
     - setup-redis
     - install-all
     - install-redis
+  block:
+    - name: Validate Redis configuration
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
+    - name: Install Redis
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
 - name: Perform Redis uninstallation tasks
-  block:
-    - name: Uninstall Redis
-      when: not redis_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
+  when: not redis_enabled | bool
   tags:
     - setup-all
     - setup-redis
+  block:
+    - name: Uninstall Redis
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
