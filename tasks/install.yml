@@ -113,6 +113,6 @@
 
 - name: Ensure Redis systemd installed
   ansible.builtin.template:
-    src: "{{ role_path }}/templates/redis.service.j2"
+    src: "{{ role_path }}/templates/systemd/redis.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ redis_identifier }}.service"
     mode: 0644
