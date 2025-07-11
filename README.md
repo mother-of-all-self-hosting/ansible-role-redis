@@ -13,7 +13,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 >
 > The Redis Labs company [announced their switch to source-available model](https://redis.com/blog/redis-adopts-dual-source-available-licensing/).
 >
-> However, we at [etke.cc](https://etke.cc) are interested in supporting the Open Source community, so although we will continue to maintain this role for a while, we recommend you to use [Valkey](https://valkey.io/) instead. You can find our Ansible role for it [here](https://github.com/mother-of-all-self-hosting/ansible-role-valkey).
+> However, we at [etke.cc](https://etke.cc) are interested in supporting the Open Source community, so although we will continue to maintain this role for a while, we recommend you to use [Valkey](https://valkey.io/) instead. You can find our Ansible role for it [on this repository](https://github.com/mother-of-all-self-hosting/ansible-role-valkey).
 
 This is an [Ansible](https://www.ansible.com/) role which installs [Redis](https://redis.io/) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
@@ -24,3 +24,9 @@ This role *implicitly* depends on:
 - (optional) [`com.devture.ansible.role.playbook_runtime_messages`](https://github.com/devture/com.devture.ansible.role.playbook_runtime_messages)
 
 Check [defaults/main.yml](defaults/main.yml) for the full list of supported options.
+
+## Development
+
+You can optionally install [pre-commit](https://pre-commit.com/) so that simple mistakes are checked and noticed before changes are pushed to a remote branch. See [`.pre-commit-config.yaml`](./.pre-commit-config.yaml) for which hooks are to be executed.
+
+See [this section](https://pre-commit.com/#usage) on the official documentation for usage.

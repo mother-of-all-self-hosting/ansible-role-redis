@@ -9,9 +9,11 @@
   ansible.builtin.command: update-grub
   become: true
   notify: Reboot
+  register: reboot
+  changed_when: "'Generating' in reboot.stdout"
 
 - name: Reboot
-  reboot:
+  ansible.builtin.reboot:
     msg: "Reboot initiated by Ansible Handler"
     connect_timeout: 5
     reboot_timeout: 300
