@@ -36,12 +36,14 @@
         cmd: "rmdir {{ redis_data_path }}"
       register: redis_data_path_deletion_result
       changed_when: redis_data_path_deletion_result.rc == 0
+      failed_when: false
 
     - name: Ensure Redis base path does not exist if empty
       ansible.builtin.command:
         cmd: "rmdir {{ redis_base_path }}"
       register: redis_base_path_deletion_result
       changed_when: redis_base_path_deletion_result.rc == 0
+      failed_when: false
 
     - name: Ensure Redis container network does not exist via community.docker.docker_network
       when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
