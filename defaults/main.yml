@@ -49,7 +49,9 @@ redis_container_additional_networks_custom: []
 redis_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_container_stop_grace_time_seconds, 30] | max }}"
 
 # A list of extra arguments to pass to the container
-redis_container_extra_arguments: []
+redis_container_extra_arguments: "{{ redis_container_extra_arguments_auto + redis_container_extra_arguments_custom }}"
+redis_container_extra_arguments_auto: []
+redis_container_extra_arguments_custom: []
 
 # List of systemd services that the Redis systemd service depends on
 redis_systemd_required_services_list: "{{ redis_systemd_required_services_list_default + redis_systemd_required_services_list_auto + redis_systemd_required_services_list_custom }}"
