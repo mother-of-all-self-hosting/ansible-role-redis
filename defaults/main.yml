@@ -18,8 +18,8 @@ redis_data_path: "{{ redis_base_path }}/data"
 # renovate: datasource=docker depName=redis versioning=semver
 redis_version: 8.4.0
 
-redis_uid: ''
-redis_gid: ''
+redis_uid: ""
+redis_gid: ""
 
 redis_container_image: "{{ redis_container_image_registry_prefix }}redis:{{ redis_container_image_tag }}"
 redis_container_image_tag: "{{ redis_version }}-alpine"
