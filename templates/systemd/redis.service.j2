@@ -28,7 +28,6 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --user={{ redis_uid }}:{{ redis_gid }} \
       --cap-drop=ALL \
       --read-only \
-      --tmpfs=/tmp:rw,noexec,nosuid,size=100m \
       --network={{ redis_container_network }} \
       {% if redis_container_redis_bind_port %}
       -p {{ redis_container_redis_bind_port }}:6379 \
@@ -36,6 +35,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --env-file={{ redis_base_path }}/env \
       --mount type=bind,src={{ redis_base_path }}/redis.conf,dst=/usr/local/etc/redis/redis.conf,ro \
       --mount type=bind,src={{ redis_data_path }},dst=/data \
+      --tmpfs=/tmp:rw,noexec,nosuid,size=100m \
       {% for arg in redis_container_extra_arguments %}
       {{ arg }} \
       {% endfor %}
