@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2024 MASH project contributors
 # SPDX-FileCopyrightText: 2024 Nikita Chernyi
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -67,6 +68,7 @@
     owner: "{{ redis_uid }}"
     group: "{{ redis_gid }}"
   with_items:
+    - env
     - "redis.conf"
 
 - name: Ensure Redis container image is pulled via community.docker.docker_image

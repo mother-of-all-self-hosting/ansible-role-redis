@@ -1,8 +1,8 @@
-# SPDX-FileCopyrightText: 2023 - 2024 Nikita Chernyi
-# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2023, 2024 Nikita Chernyi
+# SPDX-FileCopyrightText: 2023-2025 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
 # SPDX-FileCopyrightText: 2025 MASH project contributors
-# SPDX-FileCopyrightText: 2025 Suguru Hirahara
+# SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -77,3 +77,9 @@ redis_vm_overcommit_memory_enabled: false
 
 # redis_transparent_hugepage_disabled requires a reboot for changes to take affect as it is making changes to the kernel
 redis_reboot_enabled: false
+
+# Specify the timezone
+redis_environment_variables_tz: UTC
+
+# Additional environment variables.
+redis_environment_variables_additional_variables: ""

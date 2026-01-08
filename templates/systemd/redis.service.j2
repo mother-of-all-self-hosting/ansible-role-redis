@@ -1,5 +1,6 @@
 {#
-SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+SPDX-FileCopyrightText: 2023-2025 Slavi Pantaleev
+SPDX-FileCopyrightText: 2026 Suguru Hirahara
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 #}
@@ -32,6 +33,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       {% if redis_container_redis_bind_port %}
       -p {{ redis_container_redis_bind_port }}:6379 \
       {% endif %}
+      --env-file={{ redis_base_path }}/env \
       --mount type=bind,src={{ redis_base_path }}/redis.conf,dst=/usr/local/etc/redis/redis.conf,ro \
       --mount type=bind,src={{ redis_data_path }},dst=/data \
       {% for arg in redis_container_extra_arguments %}
