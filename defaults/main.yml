@@ -48,6 +48,9 @@ redis_container_additional_networks_custom: []
 # we default to at least 30 seconds.
 redis_container_stop_grace_time_seconds: "{{ [devture_systemd_docker_base_container_stop_grace_time_seconds, 30] | max }}"
 
+# Specify the size of the container's tmpfs volume
+redis_container_tmpfs_tmp_size: 128m
+
 # A list of extra arguments to pass to the container (`docker create` command)
 redis_container_extra_arguments: "{{ redis_container_extra_arguments_auto + redis_container_extra_arguments_custom }}"
 redis_container_extra_arguments_auto: []
