@@ -28,8 +28,7 @@ redis_container_image_registry_prefix_upstream: "{{ redis_container_image_regist
 redis_container_image_registry_prefix_upstream_default: docker.io/
 redis_container_image_force_pull: "{{ redis_container_image.endswith(':latest') }}"
 
-# Controls whether the container exposes a port (tcp/6379 in the container)
-# that can be used to access Redis from outside the container
+# Controls whether the container exposes its TCP port (tcp/6379 in the container).
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
 redis_container_redis_bind_port: ""
