@@ -50,6 +50,7 @@
       community.docker.docker_network:
         name: "{{ redis_container_network }}"
         state: absent
+      register: redis_network_deletion_result
 
     - name: Ensure Redis container network does not exist via ansible.builtin.command
       when: devture_systemd_docker_base_container_network_creation_method == 'command'
@@ -57,8 +58,8 @@
         cmd: >-
           {{ devture_systemd_docker_base_host_command_docker }} network rm
           {{ redis_container_network }}
-      register: network_deletion_result
-      changed_when: redis_container_network in network_deletion_result.stdout
+      register: redis_network_deletion_result
+      changed_when: redis_container_network in redis_network_deletion_result.stdout
 
 - name: Check existence of Redis local data path
   ansible.builtin.stat:
