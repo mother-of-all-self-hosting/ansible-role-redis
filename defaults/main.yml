@@ -36,6 +36,9 @@ redis_container_redis_bind_port: ""
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 redis_container_network: "{{ redis_identifier }}"
 
+# Control if the container network is deleted on uninstalling.
+redis_container_network_deletion_enabled: true
+
 # A list of additional container networks that the container would be connected to.
 # The role does not create these networks, so make sure they already exist.
 redis_container_additional_networks: "{{ redis_container_additional_networks_auto + redis_container_additional_networks_custom }}"
