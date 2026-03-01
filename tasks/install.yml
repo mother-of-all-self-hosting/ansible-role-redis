@@ -70,6 +70,7 @@
   with_items:
     - env
     - "redis.conf"
+  register: redis_support_files_result
 
 - name: Ensure Redis container image is pulled via community.docker.docker_image
   when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
@@ -78,20 +79,20 @@
     source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
     force_source: "{{ redis_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
     force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else redis_container_image_force_pull }}"
-  register: result
+  register: redis_container_image_pull_result
   retries: "{{ devture_playbook_help_container_retries_count }}"
   delay: "{{ devture_playbook_help_container_retries_delay }}"
-  until: result is not failed
+  until: redis_container_image_pull_result is not failed
 
 - name: Ensure Redis container image is pulled via ansible.builtin.command
   when: devture_systemd_docker_base_container_image_pull_method == 'command'
   ansible.builtin.command:
     cmd: "{{ devture_systemd_docker_base_host_command_docker }} pull {{ redis_container_image }}"
-  register: result
+  register: redis_container_image_pull_result
   retries: "{{ devture_playbook_help_container_retries_count }}"
   delay: "{{ devture_playbook_help_container_retries_delay }}"
-  until: result is not failed
-  changed_when: "'Downloaded newer image' in result.stdout"
+  until: redis_container_image_pull_result is not failed
+  changed_when: "'Downloaded newer image' in redis_container_image_pull_result.stdout"
 
 - name: Ensure Redis container network is created via community.docker.docker_network
   when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
@@ -119,3 +120,13 @@
     src: "{{ role_path }}/templates/systemd/redis.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ redis_identifier }}.service"
     mode: "0644"
+  register: redis_systemd_service_result
+
+- name: Determine whether Redis needs a restart
+  ansible.builtin.set_fact:
+    redis_restart_necessary: >-
+      {{
+        redis_support_files_result.changed | default(false)
+        or redis_systemd_service_result.changed | default(false)
+        or redis_container_image_pull_result.changed | default(false)
+      }}
