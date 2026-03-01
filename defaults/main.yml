@@ -16,7 +16,7 @@ redis_base_path: "/{{ redis_identifier }}"
 redis_data_path: "{{ redis_base_path }}/data"
 
 # renovate: datasource=docker depName=redis versioning=semver
-redis_version: 8.6.0
+redis_version: 8.6.1
 
 redis_uid: ""
 redis_gid: ""
