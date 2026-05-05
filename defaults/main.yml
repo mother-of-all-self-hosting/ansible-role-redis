@@ -26,7 +26,6 @@ redis_container_image_tag: "{{ redis_version }}-alpine"
 redis_container_image_registry_prefix: "{{ redis_container_image_registry_prefix_upstream }}"
 redis_container_image_registry_prefix_upstream: "{{ redis_container_image_registry_prefix_upstream_default }}"
 redis_container_image_registry_prefix_upstream_default: docker.io/
-redis_container_image_force_pull: "{{ redis_container_image.endswith(':latest') }}"
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 redis_container_network: "{{ redis_identifier }}"
