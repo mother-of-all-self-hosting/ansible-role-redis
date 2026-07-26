@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
+# SPDX-FileCopyrightText: 2026 spatterlight
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Verify Redis systemd service
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Wait for Redis service to become active (up to 180s)
+      ansible.builtin.systemd:
+        name: redis.service
+      register: redis_service
+      until: redis_service.status.ActiveState == 'active'
+      retries: 36
+      delay: 5
+
+    - name: Assert Redis service is active
+      ansible.builtin.assert:
+        that: redis_service.status.ActiveState == 'active'
+        fail_msg: "redis.service not active ({{ redis_service.status.ActiveState }})"
+        success_msg: "redis.service is active"
+
+    - name: Retrieve Redis service log for debugging
+      when: redis_debug_service_enabled | bool
+      ansible.builtin.command:
+        cmd: journalctl -xeu redis.service
+      changed_when: false
+
+    - name: Show Redis systemd service status summary
+      ansible.builtin.debug:
+        msg:
+          - "Redis systemd: {{ redis_service.status.ActiveState }}"
