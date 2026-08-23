@@ -1,14 +1,29 @@
 # SPDX-FileCopyrightText: 2026 Suguru Hirahara
 # SPDX-FileCopyrightText: 2026 spatterlight
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Verify Redis systemd service
+- name: Verify Redis
   hosts: all
   become: true
   gather_facts: false
+
   tasks:
+    # The role is not included in this playbook, so its defaults are not in
+    # scope. Reading defaults/main.yml directly keeps the version assertion
+    # below tied to the value that Renovate bumps, with nothing to keep in
+    # sync in this scenario. include_vars reads from the controller.
+    #
+    # Only values describing the role itself may be read from this namespace.
+    # Anything this scenario tunes (the connection password, for example)
+    # comes from the scenario's group_vars instead.
+    - name: Load the Redis role defaults
+      ansible.builtin.include_vars:
+        file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
+        name: redis_defaults
+
     - name: Wait for Redis service to become active (up to 180s)
       ansible.builtin.systemd:
         name: redis.service
@@ -29,7 +44,141 @@
         cmd: journalctl -xeu redis.service
       changed_when: false
 
-    - name: Show Redis systemd service status summary
+    # A systemd unit reaching "active" only means that `docker start` has not
+    # exited yet. PING is the cheapest answer the server itself can give, so it
+    # is the first thing here that proves a usable Redis rather than merely a
+    # running process.
+    #
+    # Unlike the sibling Valkey role, this role does not ask for a UNIX socket
+    # listener in redis.conf, so TCP is the only path its consumers have and
+    # the only one there is to probe.
+    #
+    # community.docker is deliberately avoided throughout this playbook: the
+    # linting environment in CI has no collections installed.
+    - name: Wait for Redis to answer PING over TCP (up to 120s)
+      ansible.builtin.command:
+        cmd: >-
+          docker exec {{ redis_defaults.redis_identifier }}
+          redis-cli -a {{ redis_connection_password }} --no-auth-warning PING
+      register: redis_ping_tcp
+      changed_when: false
+      until: redis_ping_tcp.rc == 0 and 'PONG' in redis_ping_tcp.stdout
+      retries: 24
+      delay: 5
+
+    - name: Assert Redis answers PING over TCP
+      ansible.builtin.assert:
+        that: "'PONG' in redis_ping_tcp.stdout"
+        fail_msg: "Redis did not answer PING over TCP: {{ redis_ping_tcp.stdout | default('no output') }}"
+        success_msg: "Redis answers PING over TCP"
+
+    # This scenario sets a connection password, so an unauthenticated client
+    # must be turned away. Without this probe, the `requirepass` branch of
+    # redis.conf.j2 could stop being rendered and everything else here would
+    # still pass.
+    #
+    # redis-cli exits 0 even when the server refuses the command, and prints
+    # the refusal on stdout rather than stderr, so the return code proves
+    # nothing here and the answer itself has to be inspected.
+    - name: Ping Redis without authenticating
+      ansible.builtin.command:
+        cmd: "docker exec {{ redis_defaults.redis_identifier }} redis-cli PING"
+      register: redis_ping_unauthenticated
+      changed_when: false
+      failed_when: false
+
+    - name: Assert Redis rejects unauthenticated clients
+      ansible.builtin.assert:
+        that:
+          - "'NOAUTH' in (redis_ping_unauthenticated.stdout + redis_ping_unauthenticated.stderr)"
+          - "'PONG' not in redis_ping_unauthenticated.stdout"
+        fail_msg: >-
+          Redis did not reject an unauthenticated client:
+          {{ redis_ping_unauthenticated.stdout | default('no output') }}
+        success_msg: "Redis rejects unauthenticated clients"
+
+    # Turning away a client that sends no password only proves that some
+    # password is set. This proves that the password the server accepts is the
+    # one this scenario asked for, which is what ties the rendered redis.conf
+    # to the running process rather than just to disk.
+    - name: Ping Redis with the wrong password
+      ansible.builtin.command:
+        cmd: >-
+          docker exec {{ redis_defaults.redis_identifier }}
+          redis-cli -a not-the-configured-password --no-auth-warning PING
+      register: redis_ping_wrong_password
+      changed_when: false
+      failed_when: false
+
+    - name: Assert Redis rejects the wrong password
+      ansible.builtin.assert:
+        that:
+          - "'WRONGPASS' in (redis_ping_wrong_password.stdout + redis_ping_wrong_password.stderr)"
+          - "'PONG' not in redis_ping_wrong_password.stdout"
+        fail_msg: >-
+          Redis did not reject a client using the wrong password:
+          {{ redis_ping_wrong_password.stdout | default('no output') }}
+        success_msg: "Redis rejects the wrong password"
+
+    # A write and a read back through a separate connection, which covers the
+    # whole path (client -> server -> keyspace) in both directions rather than
+    # just the fact that the server accepts connections.
+    - name: Write a key to Redis
+      ansible.builtin.command:
+        cmd: >-
+          docker exec {{ redis_defaults.redis_identifier }}
+          redis-cli -a {{ redis_connection_password }} --no-auth-warning
+          SET molecule-key molecule-value
+      register: redis_set
+      changed_when: true
+
+    - name: Read the key back from Redis
+      ansible.builtin.command:
+        cmd: >-
+          docker exec {{ redis_defaults.redis_identifier }}
+          redis-cli -a {{ redis_connection_password }} --no-auth-warning
+          GET molecule-key
+      register: redis_get
+      changed_when: false
+
+    - name: Assert the key was stored and read back
+      ansible.builtin.assert:
+        that:
+          - "'OK' in redis_set.stdout"
+          - "'molecule-value' in redis_get.stdout"
+        fail_msg: "A SET/GET round-trip failed (SET: {{ redis_set.stdout }}, GET: {{ redis_get.stdout }})"
+        success_msg: "A SET/GET round-trip works"
+
+    # Tying the running version to `redis_version` is what makes this scenario
+    # a real test of the version that Renovate bumps: a bump that produces an
+    # unusable image cannot pass here.
+    - name: Query the version reported by the running Redis
+      ansible.builtin.command:
+        cmd: >-
+          docker exec {{ redis_defaults.redis_identifier }}
+          redis-cli -a {{ redis_connection_password }} --no-auth-warning
+          INFO server
+      register: redis_info_server
+      changed_when: false
+
+    # INFO fields are terminated with CRLF, so the carriage return has to be
+    # excluded while capturing rather than trimmed off a greedier match.
+    - name: Determine the version reported by the running Redis
+      ansible.builtin.set_fact:
+        redis_reported_version: "{{ (redis_info_server.stdout | regex_search('redis_version:([^\\r\\n]+)', '\\1') | first) | trim }}"
+
+    - name: Assert the running Redis is the version the role asks for
+      ansible.builtin.assert:
+        that: redis_reported_version.startswith(redis_defaults.redis_version | string)
+        fail_msg: >-
+          Redis reports version {{ redis_reported_version | default('none') }},
+          but the role asks for {{ redis_defaults.redis_version }}
+        success_msg: "Redis reports version {{ redis_reported_version }}"
+
+    - name: Show Redis verification summary
       ansible.builtin.debug:
         msg:
           - "Redis systemd: {{ redis_service.status.ActiveState }}"
+          - "PING over TCP: {{ redis_ping_tcp.stdout }}"
+          - "SET/GET round-trip: {{ redis_get.stdout }}"
+          - "Version: {{ redis_reported_version }}"
