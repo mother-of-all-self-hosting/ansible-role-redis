@@ -167,7 +167,7 @@
       ansible.builtin.set_fact:
         redis_reported_version: "{{ (redis_info_server.stdout | regex_search('redis_version:([^\\r\\n]+)', '\\1') | first) | trim }}"
 
-    - name: Assert the running Redis is the version the role asks for
+    - name: Assert the running Redis is the version this role installs
       ansible.builtin.assert:
         that: redis_reported_version.startswith(redis_defaults.redis_version | string)
         fail_msg: >-
