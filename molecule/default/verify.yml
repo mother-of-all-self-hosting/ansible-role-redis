@@ -165,10 +165,8 @@
     - name: Assert the running Redis is the version this role installs
       ansible.builtin.assert:
         that: redis_reported_version.startswith(redis_defaults.redis_version | string)
-        fail_msg: >-
-          Redis reports version {{ redis_reported_version | default('none') }},
-          but the role asks for {{ redis_defaults.redis_version }}
-        success_msg: "Redis reports version {{ redis_reported_version }}"
+        fail_msg: "Redis reports {{ redis_reported_version | default('none') }}, expected {{ redis_defaults.redis_version }}"
+        success_msg: "Redis reports {{ redis_reported_version }}"
 
     - name: Show the Redis verification summary
       ansible.builtin.debug:
