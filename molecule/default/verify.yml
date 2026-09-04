@@ -170,10 +170,10 @@
           but the role asks for {{ redis_defaults.redis_version }}
         success_msg: "Redis reports version {{ redis_reported_version }}"
 
-    - name: Show Redis verification summary
+    - name: Show the Redis verification summary
       ansible.builtin.debug:
         msg:
           - "Redis systemd: {{ redis_service.status.ActiveState }}"
-          - "PING over TCP: {{ redis_ping_tcp.stdout }}"
-          - "SET/GET round-trip: {{ redis_get.stdout }}"
-          - "Version: {{ redis_reported_version }}"
+          - "Redis version: {{ redis_reported_version }}"
+          - "Redis PING over TCP: {{ redis_ping_tcp.stdout }}"
+          - "Redis SET/GET round-trip: {{ redis_get.stdout }}"
