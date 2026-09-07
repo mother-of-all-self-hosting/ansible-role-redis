@@ -19,21 +19,27 @@
         file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
         name: redis_defaults
 
-    - name: Wait for Redis service to become active (up to 180s)
-      ansible.builtin.systemd:
+    - name: Wait for the Redis systemd service to become active (up to 180s)
+      ansible.builtin.systemd_service:
         name: redis.service
       register: redis_service
       until: redis_service.status.ActiveState == 'active'
       retries: 36
       delay: 5
+      # So that giving up is reported by the assertion below rather than as a
+      # wall of systemd unit properties.
+      failed_when: false
 
-    - name: Assert Redis service is active
+    # `Restart=always` in the systemd unit means that even a container which crashes
+    # and gets restarted reads as active here, so this is a precondition rather than
+    # a result.
+    - name: Assert the Redis systemd service is active
       ansible.builtin.assert:
         that: redis_service.status.ActiveState == 'active'
-        fail_msg: "redis.service not active ({{ redis_service.status.ActiveState }})"
+        fail_msg: "redis.service is not active ({{ redis_service.status.ActiveState }})"
         success_msg: "redis.service is active"
 
-    - name: Retrieve Redis service log for debugging
+    - name: Retrieve the Redis systemd service log for debugging
       when: redis_debug_service_enabled | bool
       ansible.builtin.command:
         cmd: journalctl -xeu redis.service

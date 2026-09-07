@@ -13,7 +13,7 @@
   when: redis_service_stat.stat.exists | bool
   block:
     - name: Ensure Redis systemd service is stopped
-      ansible.builtin.systemd:
+      ansible.builtin.systemd_service:
         name: "{{ redis_identifier }}"
         state: stopped
         enabled: false
