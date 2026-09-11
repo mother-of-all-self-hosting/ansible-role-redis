@@ -10,6 +10,10 @@
   become: true
   gather_facts: false
 
+  vars:
+    redis_verify_units:
+      - redis.service
+
   tasks:
     - name: Verify that Redis works
       block:
@@ -21,13 +25,14 @@
             file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
             name: redis_defaults
 
-        - name: Wait for the Redis systemd service to become active (up to 180s)
+        - name: Wait for the Redis systemd services to become active (up to 180s each)
           ansible.builtin.systemd_service:
-            name: redis.service
-          register: redis_service
-          until: redis_service.status.ActiveState == 'active'
+            name: "{{ item }}"
+          register: redis_services
+          until: redis_services.status.ActiveState == 'active'
           retries: 36
           delay: 5
+          loop: "{{ redis_verify_units }}"
           # So that giving up is reported by the assertion below rather than as a
           # wall of systemd unit properties.
           failed_when: false
@@ -35,17 +40,20 @@
         # `Restart=always` in the systemd unit means that even a container which crashes
         # and gets restarted reads as active here, so this is a precondition rather than
         # a result.
-        - name: Assert the Redis systemd service is active
+        - name: Assert the Redis systemd services are active
           ansible.builtin.assert:
-            that: redis_service.status.ActiveState == 'active'
-            fail_msg: "redis.service is not active ({{ redis_service.status.ActiveState }})"
-            success_msg: "redis.service is active"
+            that: redis_services.results | map(attribute='status.ActiveState') | unique | list == ['active']
+            fail_msg: >-
+              Not every service is active:
+              {{ dict(redis_verify_units | zip(redis_services.results | map(attribute='status.ActiveState'))) }}
+            success_msg: "Every systemd service is active"
 
-        - name: Retrieve the Redis systemd service log for debugging
+        - name: Retrieve the Redis systemd services log for debugging
           when: redis_debug_service_enabled | bool
           ansible.builtin.command:
-            cmd: journalctl --no-pager --output=cat --unit=redis.service
+            cmd: "journalctl --no-pager --output=cat --unit={{ item }}"
           changed_when: false
+          loop: "{{ redis_verify_units }}"
 
         # A systemd unit reaching "active" only means that `docker start` has not
         # exited yet. PING is the cheapest answer the server itself can give, so it
@@ -179,7 +187,7 @@
         - name: Show the Redis verification summary
           ansible.builtin.debug:
             msg:
-              - "Redis systemd: {{ redis_service.status.ActiveState }}"
+              - "Redis systemd: {% for unit, state in redis_verify_units | zip(redis_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
               - "Redis version: {{ redis_reported_version }}"
               - "Redis PING over TCP: {{ redis_ping_tcp.stdout }}"
               - "Redis SET/GET round-trip: {{ redis_get.stdout }}"
