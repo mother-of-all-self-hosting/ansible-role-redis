@@ -39,7 +39,9 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       {{ arg }} \
       {% endfor %}
       {{ redis_container_image }} \
-      redis-server /usr/local/etc/redis/redis.conf
+      {% for arg in redis_process_extra_arguments %}
+      {{ arg }} \
+      {% endfor %}
 
 {% for network in redis_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ redis_identifier }}
