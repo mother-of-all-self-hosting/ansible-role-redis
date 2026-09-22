@@ -9,7 +9,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 # Redis Ansible role
 
 > [!NOTE]
-> Starting from 8.0.0, Redis is licensed under your choice of multiple licenses, one of which is AGPLv3. See [the release note for 8.0.0](https://github.com/redis/redis/releases/tag/8.0.0) for details.
+> Starting from 8.0.0, Redis is licensed under your choice of multiple licenses, one of which is AGPLv3. Refer to [the release note for 8.0.0](https://github.com/redis/redis/releases/tag/8.0.0) for details.
 
 This is an [Ansible](https://www.ansible.com/) role which installs [Redis](https://redis.io/) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
