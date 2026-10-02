@@ -18,11 +18,22 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Setting up Redis
 
-This is an [Ansible](https://www.ansible.com/) role which installs [Redis](https://redisbudget.org) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
+> [!NOTE]
+> Starting from 8.0.0, Redis is licensed under your choice of the multiple licenses, one of which is AGPLv3. Refer to [the release note for 8.0.0](https://github.com/redis/redis/releases/tag/8.0.0) for details.
 
-Redis is a local-first personal finance tool.
+This is an [Ansible](https://www.ansible.com/) role which installs [Redis](https://redis.io/) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
-See the project's [documentation](https://redisbudget.org/docs/) to learn what Redis does and why it might be useful to you.
+Redis is a free and open-source, in-memory data store used as a database, cache, streaming engine, and message broker.
+
+See the project's [documentation](https://redis.io/docs/latest/) to learn what Redis does and why it might be useful to you.
+
+> [!WARNING]
+> Because Redis is not as flexible as other databases such as Postgres when it comes to authentication and data separation, it's **recommended that you run separate Redis instances** (one for each service which require Redis). Redis supports multiple database and a [SELECT](https://redis.io/commands/select/) command for switching between them. However, **reusing the same Redis instance is not good enough** because:
+>
+> - if all services use the same Redis instance and database (id = 0), services may conflict with one another
+> - the number of databases is limited to [16 by default](https://github.com/redis/redis/blob/aa2403ca98f6a39b6acd8373f8de1a7ba75162d5/redis.conf#L376-L379), which may or may not be enough. With configuration changes, this is solvable.
+> - some services do not support switching the Redis database and always insist on using the default one (id = 0)
+> - Redis [does not support different authentication credentials for its different databases](https://stackoverflow.com/a/37262596), so each service can potentially read and modify other services' data
 
 ## Adjusting the playbook configuration
 
@@ -46,18 +57,6 @@ redis_enabled: true
 ########################################################################
 ```
 
-### Set the hostname
-
-To enable Redis you need to set the hostname as well. To do so, add the following configuration to your `vars.yml` file. Make sure to replace `example.com` with your own value.
-
-```yaml
-redis_hostname: "example.com"
-```
-
-After adjusting the hostname, make sure to adjust your DNS records to point the domain to your server.
-
-**Note**: hosting Redis under a subpath (by configuring the `redis_path_prefix` variable) does not seem to be possible due to Redis's technical limitations.
-
 ### Extending the configuration
 
 There are some additional things you may wish to configure about the service.
@@ -78,7 +77,7 @@ If you use the MASH playbook, the shortcut commands with the [`just` program](ht
 
 ## Usage
 
-After running the command for installation, Redis becomes available at the specified hostname like `https://example.com`. To use it, open the URL on the browser and create an account.
+After running the command for installation, Redis becomes available.
 
 ## Troubleshooting
 
